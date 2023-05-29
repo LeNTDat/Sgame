@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Road : MonoBehaviour
 {
-    GameObject Player;
     [SerializeField] List<Point> roads = new List<Point>();
 
     public List<Point> roadLine{ get { return roads; } }
