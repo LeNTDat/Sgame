@@ -13,7 +13,6 @@ public class SpanwPlayer : MonoBehaviour
     void Start()
     {
         gameManager = GameObject.FindObjectOfType<GameManager>();
-        
     }
 
     void Update()
@@ -40,6 +39,4 @@ public class SpanwPlayer : MonoBehaviour
         }
         isSpawned = true;
     }
-
-   
 }

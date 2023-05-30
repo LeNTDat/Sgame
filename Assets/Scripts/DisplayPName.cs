@@ -12,7 +12,6 @@ public class DisplayPName : MonoBehaviour
 
     void Start()
     {
-        print(inputField.text);
     }
 
     void Update()

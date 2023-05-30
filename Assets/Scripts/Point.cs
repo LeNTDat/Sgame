@@ -7,7 +7,8 @@ using UnityEngine;
 public class Point : MonoBehaviour
 {
     [SerializeField] TMP_Text block;
-
+    public bool isBonus = false;
+    public bool isTrap = false;
     void Start()
     {
         block = GetComponentInChildren<TMP_Text>();
