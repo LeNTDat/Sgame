@@ -7,15 +7,7 @@ using UnityEngine;
 public class DisplayPName : MonoBehaviour
 {
     [SerializeField] TMP_Text playerName;
-    TMP_InputField inputField;
+    [SerializeField] TMP_InputField inputField;
     
 
-    void Start()
-    {
-    }
-
-    void Update()
-    {
-        
-    }
 }

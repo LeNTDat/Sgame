@@ -2,25 +2,28 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.Progress;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int currentPosValue;
-    [SerializeField] float waitingTime = 1f;
-    [SerializeField] bool isTurned = false;
     [SerializeField] int penaltyPadNum = 3;
+    [SerializeField] float waitingTime = 1f;
+    [SerializeField] float delayTime = 2f;
+    [SerializeField] bool isTurned = false;
+    [SerializeField] bool isFinish = false;
+    [SerializeField] bool isHavePlayer = true;
     SpanwPlayer players;
     GameManager manager;
     Road road;
     Dice dice;
-    public bool Turned { get { return isTurned; } set { isTurned = value; } }
-    public int CurrentPosValue{ get { return currentPosValue; } set { currentPosValue = value; } }
-
+    public bool Turned { get { return isTurned; } }
+    public int CurrentPosValue{ get { return currentPosValue; } }
 
     void Start()
     {
         manager = GameObject.FindObjectOfType<GameManager>();
-        manager.IsTurn = isTurned;
         players = GameObject.FindObjectOfType<SpanwPlayer>();
         dice = GameObject.FindAnyObjectByType<Dice>();
         road = GetComponent<Road>();
@@ -31,17 +34,53 @@ public class PlayerMovement : MonoBehaviour
         if (manager.IsRoll)
         {
             RotatePlayerTurn();
+        }
+        if (manager.IsEndTurn)
+        {
             RestartPlayerTurn();
         }
+        
 
+    }
+
+    void OnCheckingPlayer()
+    {
+        int count = 0;
+        int finishPlayer = players.PlayerInPool.Length;
+        foreach (var item in players.PlayerInPool)
+        {
+            if(item.GetComponent<PlayerMovement>().isFinish) { finishPlayer--; }
+            if (!item.GetComponent<PlayerMovement>().isFinish)
+            {
+                if (!item.GetComponent<PlayerMovement>().isTurned)
+                {
+                    count++;
+                }
+            }
+        }
+        if (finishPlayer == 0) { manager.IsEndGame = true; }
+        if(count > 0)
+        {
+            isHavePlayer = false;
+        }else if(count == 0 && !isFinish)
+        {
+            isHavePlayer = true;
+        }
     }
     void RestartPlayerTurn()
     {
-        for (int i = 0; i < players.PlayerInPool.Length; i++)
+        OnCheckingPlayer();
+        if (isHavePlayer)
         {
-            if (players.PlayerInPool.Last().GetComponent<PlayerMovement>().Turned == true)
+            for (int i = players.PlayerInPool.Length - 1; i >= 0; i--)
             {
-                players.PlayerInPool[i].GetComponent<PlayerMovement>().Turned = false;
+                PlayerMovement playerIndex = players.PlayerInPool[i].GetComponent<PlayerMovement>();
+                if (playerIndex.currentPosValue == road.RoadLine.Count - 1)
+                {
+                    playerIndex.isFinish = true;
+                    playerIndex.isTurned = true;
+                }
+                playerIndex.isTurned = false;
             }
         }
     }
@@ -50,49 +89,48 @@ public class PlayerMovement : MonoBehaviour
     {
         for(int i = 0; i < players.PlayerInPool.Length; i++)
         {
-            if (!players.PlayerInPool[i].GetComponent<PlayerMovement>().Turned)
+            PlayerMovement playerIndex = players.PlayerInPool[i].GetComponent<PlayerMovement>();
+            
+            if (!playerIndex.isTurned && !playerIndex.isFinish)
             {
                 StartCoroutine(PlayerMove(i));
-                players.PlayerInPool[i].GetComponent<PlayerMovement>().Turned = true;
+                playerIndex.isTurned = true;
                 manager.IsRoll = false;
                 manager.IsEndTurn = false;
                 break;
             }
         }
-    }
 
-    void PlayerGetMoving(Vector3 pos,int indexOfPlayerTurn, int indexOfPad)
-    {
-        pos.y = pos.y + transform.localScale.y / 2 + road.RoadLine[indexOfPad].transform.localScale.y;
-        players.PlayerInPool[indexOfPlayerTurn].transform.position = pos;
     }
 
     IEnumerator PlayerMove(int indexOfPlayerTurn)
     {
-        int IndexPos = players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>().CurrentPosValue;
-        int padNum = IndexPos + dice.DiceR;
-       
-            for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count; i++)
+        PlayerMovement playerIndex = players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
+        int IndexPos = playerIndex.CurrentPosValue;
+        int padNum = IndexPos + dice.DiceR * 2;
+        for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count; i++)
+        {
+            yield return new WaitForSeconds(waitingTime);
+            Vector3 NextPos = road.RoadLine[i].transform.position;
+            NextPos.y = NextPos.y + transform.localScale.y / 2 + road.RoadLine[i].transform.localScale.y;
+            playerIndex.transform.position = NextPos;
+            playerIndex.currentPosValue++;
+
+            if (road.RoadLine[i].isBonus && i == padNum) { 
+                yield return new WaitForSeconds(delayTime);
+                playerIndex.isTurned = false;
+                manager.IsRoll = false;
+                manager.IsEndTurn = true;
+            }
+
+            if (road.RoadLine[i].isTrap && i == padNum)
             {
-                yield return new WaitForSeconds(waitingTime);
-                Vector3 newNextPos = road.RoadLine[i].transform.position;
-                PlayerGetMoving(newNextPos,indexOfPlayerTurn, i);
-                players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>().CurrentPosValue++;
-
-                if (road.RoadLine[i].isBonus && i == padNum) { 
-                    yield return new WaitForSeconds(waitingTime);
-                    players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>().Turned = false;
-                    manager.IsRoll = false;
-                    manager.IsEndTurn = false;
-                }
-                if (road.RoadLine[i].isTrap && i == padNum)
-                {
-                    IndexPos = padNum - penaltyPadNum;
-                    yield return new WaitForSeconds(waitingTime);
-                    Vector3 newPenaltyPos = road.RoadLine[IndexPos].transform.position;
-                    PlayerGetMoving(newPenaltyPos, indexOfPlayerTurn, IndexPos);
-                    players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>().CurrentPosValue = IndexPos;
-
+                IndexPos = padNum - penaltyPadNum;
+                yield return new WaitForSeconds(delayTime);
+                Vector3 PenaltyPos = road.RoadLine[IndexPos].transform.position;
+                PenaltyPos.y = PenaltyPos.y + transform.localScale.y / 2 + road.RoadLine[IndexPos].transform.localScale.y;
+                playerIndex.transform.position = PenaltyPos;
+                playerIndex.currentPosValue = IndexPos;
             }
         }
         yield return null;

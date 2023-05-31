@@ -5,9 +5,9 @@ public class SpanwPlayer : MonoBehaviour
     [SerializeField] GameObject startPoint;
     [SerializeField] GameObject[] player;
     [SerializeField] int sizeOfPool;
-    bool isSpawned = false;
-    GameObject[] playerPool;
     GameManager gameManager;
+    GameObject[] playerPool;
+    bool isSpawned = false;
     public GameObject[] PlayerInPool { get { return playerPool; } }
 
     void Start()
