@@ -107,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
     {
         PlayerMovement playerIndex = players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
         int IndexPos = playerIndex.CurrentPosValue;
-        int padNum = IndexPos + dice.DiceR * 2;
+        int padNum = IndexPos + dice.DiceR;
         for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count; i++)
         {
             yield return new WaitForSeconds(waitingTime);
