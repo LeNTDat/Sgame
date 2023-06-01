@@ -39,8 +39,6 @@ public class PlayerMovement : MonoBehaviour
         {
             RestartPlayerTurn();
         }
-        
-
     }
 
     void OnCheckingPlayer()
@@ -59,13 +57,9 @@ public class PlayerMovement : MonoBehaviour
             }
         }
         if (finishPlayer == 0) { manager.IsEndGame = true; }
-        if(count > 0)
-        {
-            isHavePlayer = false;
-        }else if(count == 0 && !isFinish)
-        {
-            isHavePlayer = true;
-        }
+        if(count > 0){ isHavePlayer = false;}
+        else 
+        if(count == 0 && !isFinish){isHavePlayer = true;}
     }
     void RestartPlayerTurn()
     {
@@ -90,7 +84,6 @@ public class PlayerMovement : MonoBehaviour
         for(int i = 0; i < players.PlayerInPool.Length; i++)
         {
             PlayerMovement playerIndex = players.PlayerInPool[i].GetComponent<PlayerMovement>();
-            
             if (!playerIndex.isTurned && !playerIndex.isFinish)
             {
                 StartCoroutine(PlayerMove(i));

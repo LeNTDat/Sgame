@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MovePad
   - SizePlayer
+  - PlayerName
   layers:
   - Default
   - TransparentFX

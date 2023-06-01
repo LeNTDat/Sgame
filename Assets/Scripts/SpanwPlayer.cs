@@ -1,14 +1,21 @@
+using System.Xml.Linq;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SpanwPlayer : MonoBehaviour
 {
+    [SerializeField] TMP_InputField[] inputField;
     [SerializeField] GameObject startPoint;
     [SerializeField] GameObject[] player;
+    [SerializeField] string[] playerName;
     [SerializeField] int sizeOfPool;
+
     GameManager gameManager;
     GameObject[] playerPool;
-    bool isSpawned = false;
+
     public GameObject[] PlayerInPool { get { return playerPool; } }
+    bool isSpawned = false;
 
     void Start()
     {
@@ -17,10 +24,35 @@ public class SpanwPlayer : MonoBehaviour
 
     void Update()
     {
+        SpawnInputName();
+
         if (gameManager.isStart && !isSpawned )
         {
-            sizeOfPool = gameManager.PlayerSize;
+            GetPlayerName();
             SpawnPlayerInPool();
+        }
+    }
+
+    void SpawnInputName()
+    {
+        if (gameManager.IsSumit){
+        sizeOfPool = gameManager.PlayerSize;
+            for ( int i = 0; i < sizeOfPool; i++)
+            {
+                inputField[i].gameObject.SetActive(true);
+            }
+        }
+    }
+
+    void GetPlayerName()
+    {
+        playerName = new string[sizeOfPool];
+        for( int i = 0; i < sizeOfPool; i++ )
+        {
+            if(playerName[i] == null)
+            {
+                playerName[i] = inputField[i].text;
+            }
         }
     }
 
@@ -34,7 +66,7 @@ public class SpanwPlayer : MonoBehaviour
             if (playerPool[i] == null)
             {
                 playerPool[i] = Instantiate(player[i], StartPos, Quaternion.identity);
-                playerPool[i].name = i.ToString();
+                playerPool[i].name = playerName[i];
             }
         }
         isSpawned = true;

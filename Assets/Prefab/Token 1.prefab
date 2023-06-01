@@ -186,7 +186,7 @@ GameObject:
   - component: {fileID: 2624873747111041853}
   - component: {fileID: 2624873747111041857}
   - component: {fileID: 3335496000494164839}
-  - component: {fileID: 330966918548259748}
+  - component: {fileID: 7471179606101592399}
   m_Layer: 0
   m_Name: Token 1
   m_TagString: Untagged
@@ -299,9 +299,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentPosValue: 0
+  penaltyPadNum: 3
   waitingTime: 1
+  delayTime: 2
   isTurned: 0
---- !u!114 &330966918548259748
+  isFinish: 0
+  isHavePlayer: 1
+--- !u!114 &7471179606101592399
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -313,5 +317,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16fca4f96cf05144e937cb36c0b358cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerName: {fileID: 815856962445257525}
-  inputField: {fileID: 0}
+  PlayerName: {fileID: 815856962445257525}
+  isShow: 0

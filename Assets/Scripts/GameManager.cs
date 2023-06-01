@@ -5,16 +5,20 @@ using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] bool isRolled = false;
-    [SerializeField] bool isEndTurn = true;
+    [SerializeField] bool isSubmitPlayerSize = false;
     [SerializeField] bool isEndGame = false;
+    [SerializeField] bool isEndTurn = true;
+    [SerializeField] bool isRolled = false;
     [SerializeField] int playerSize;
-    Dropdown m_Dropdown;
-    public bool isStart = false;
-    public bool IsRoll { get { return isRolled; } set { isRolled = value; } }
+
+    public bool IsEndGame { get {  return isEndGame; } set { isEndGame = value; } }
     public bool IsEndTurn { get { return isEndTurn; } set { isEndTurn = value; } }
-    public bool IsEndGame { get {  return isEndGame; } set { isEndGame = value; } } 
+    public bool IsRoll { get { return isRolled; } set { isRolled = value; } }
+    public bool IsSumit { get { return isSubmitPlayerSize; }}
     public int PlayerSize { get { return playerSize; } }
+    public bool isStart = false;
+
+    Dropdown m_Dropdown;
     void Start()
     {
         m_Dropdown = GameObject.FindWithTag("SizePlayer").GetComponentInChildren<Dropdown>();
@@ -24,15 +28,25 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    public void GameStarter ()
+    {
+        isStart = true;
+    }
+
     public void EndTurn()
     {
-        IsEndTurn = true;
+        isEndTurn = true;
+    }
+
+    public void SubmitPlayerSize ()
+    {
+        isSubmitPlayerSize = true;
     }
 
     void PlayerNumber(Dropdown change)
     {
         int index = change.value;
-        if (!isStart)
+        if (!isSubmitPlayerSize)
         {
             playerSize = Int32.Parse(m_Dropdown.options[index].text);
         }
