@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Linq;
 using TMPro;
 using Unity.VisualScripting;
@@ -12,9 +13,9 @@ public class SpanwPlayer : MonoBehaviour
     [SerializeField] int sizeOfPool;
 
     GameManager gameManager;
-    GameObject[] playerPool;
+    List<GameObject> gameObjList;
 
-    public GameObject[] PlayerInPool { get { return playerPool; } }
+    public List<GameObject> PlayerOutPool { get { return gameObjList; } }
     bool isSpawned = false;
 
     void Start()
@@ -58,16 +59,14 @@ public class SpanwPlayer : MonoBehaviour
 
     void SpawnPlayerInPool ()
     {
-        playerPool = new GameObject[sizeOfPool];
+        gameObjList = new List<GameObject>();
         for (int i = 0; i < sizeOfPool; i++)
         {
             Vector3 StartPos = startPoint.transform.position;
             StartPos.y = StartPos.y + player[i].transform.localScale.y / 2 + startPoint.transform.localScale.y;
-            if (playerPool[i] == null)
-            {
-                playerPool[i] = Instantiate(player[i], StartPos, Quaternion.identity);
-                playerPool[i].name = playerName[i];
-            }
+            GameObject obj = Instantiate(player[i], StartPos, Quaternion.identity);
+            gameObjList.Add(obj);
+            gameObjList[i].name = playerName[i];
         }
         isSpawned = true;
     }

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using static UnityEditor.Progress;
 
 public class GameManager : MonoBehaviour
 {
@@ -37,7 +39,7 @@ public class GameManager : MonoBehaviour
     {
         isEndTurn = true;
     }
-
+    
     public void SubmitPlayerSize ()
     {
         isSubmitPlayerSize = true;

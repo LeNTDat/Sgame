@@ -1,28 +1,39 @@
-using System;
 using System.Collections;
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
+using UnityEngine.SceneManagement;
 using static UnityEditor.Progress;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int currentPosValue;
+    [SerializeField] int rank = 0;
+    [SerializeField] int turn = 0;
+    [SerializeField] int bonus = 0;
+    [SerializeField] int trap = 0;
     [SerializeField] int penaltyPadNum = 3;
     [SerializeField] float waitingTime = 1f;
     [SerializeField] float delayTime = 2f;
     [SerializeField] bool isTurned = false;
     [SerializeField] bool isFinish = false;
     [SerializeField] bool isHavePlayer = true;
+    [SerializeField] bool isCanMove = true;
+
+    ScoreManager scoreManager;
     SpanwPlayer players;
     GameManager manager;
     Road road;
     Dice dice;
-    public bool Turned { get { return isTurned; } }
-    public int CurrentPosValue{ get { return currentPosValue; } }
+
+    public int NumberOfTurn{ get { return turn; } }
+    public int NumberOfTrap { get { return trap; } }
+    public int NumberOfBonus { get { return bonus; } }
+    public int Ranked { get { return rank; } }
+
 
     void Start()
     {
+        scoreManager = GameObject.FindObjectOfType<ScoreManager>();
         manager = GameObject.FindObjectOfType<GameManager>();
         players = GameObject.FindObjectOfType<SpanwPlayer>();
         dice = GameObject.FindAnyObjectByType<Dice>();
@@ -35,45 +46,53 @@ public class PlayerMovement : MonoBehaviour
         {
             RotatePlayerTurn();
         }
-        if (manager.IsEndTurn)
+        if (manager.IsEndTurn && !manager.IsEndGame)
         {
             RestartPlayerTurn();
+            FinishCheck();
         }
+        
     }
 
     void OnCheckingPlayer()
     {
         int count = 0;
-        int finishPlayer = players.PlayerInPool.Length;
-        foreach (var item in players.PlayerInPool)
+        int finishPlayer = players.PlayerOutPool.Count;
+        foreach (var item in players.PlayerOutPool)
         {
-            if(item.GetComponent<PlayerMovement>().isFinish) { finishPlayer--; }
-            if (!item.GetComponent<PlayerMovement>().isFinish)
+            PlayerMovement playersIndex = item.GetComponent<PlayerMovement>();
+            if (playersIndex.currentPosValue == road.RoadLine.Count - 1)
             {
-                if (!item.GetComponent<PlayerMovement>().isTurned)
+                playersIndex.isTurned = true;
+                playersIndex.isFinish = true;
+                playersIndex.isCanMove = false;
+                break;
+            }
+            if (playersIndex.isFinish) { 
+                finishPlayer--;
+            }
+            if (!playersIndex.isFinish)
+            {
+                if (!playersIndex.isTurned)
                 {
                     count++;
                 }
             }
         }
-        if (finishPlayer == 0) { manager.IsEndGame = true; }
+        if (finishPlayer == 0) { manager.IsEndGame = true;  }
         if(count > 0){ isHavePlayer = false;}
-        else 
-        if(count == 0 && !isFinish){isHavePlayer = true;}
+        else if(count == 0 ){isHavePlayer = true;}
     }
+
     void RestartPlayerTurn()
     {
         OnCheckingPlayer();
-        if (isHavePlayer)
+        for (int i = players.PlayerOutPool.Count - 1; i >= 0; i--)
         {
-            for (int i = players.PlayerInPool.Length - 1; i >= 0; i--)
+            PlayerMovement playerIndex = players.PlayerOutPool[i].GetComponent<PlayerMovement>();
+
+            if (isHavePlayer)
             {
-                PlayerMovement playerIndex = players.PlayerInPool[i].GetComponent<PlayerMovement>();
-                if (playerIndex.currentPosValue == road.RoadLine.Count - 1)
-                {
-                    playerIndex.isFinish = true;
-                    playerIndex.isTurned = true;
-                }
                 playerIndex.isTurned = false;
             }
         }
@@ -81,9 +100,9 @@ public class PlayerMovement : MonoBehaviour
 
     void RotatePlayerTurn()
     {
-        for(int i = 0; i < players.PlayerInPool.Length; i++)
+        for(int i = 0; i < players.PlayerOutPool.Count; i++)
         {
-            PlayerMovement playerIndex = players.PlayerInPool[i].GetComponent<PlayerMovement>();
+            PlayerMovement playerIndex = players.PlayerOutPool[i].GetComponent<PlayerMovement>();
             if (!playerIndex.isTurned && !playerIndex.isFinish)
             {
                 StartCoroutine(PlayerMove(i));
@@ -96,12 +115,29 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    void FinishCheck()
+    {
+        for (int i = 0; i < players.PlayerOutPool.Count; i++)
+        {
+            if (players.PlayerOutPool[i].GetComponent<PlayerMovement>().isFinish)
+            {
+                scoreManager.GetFinishList(players.PlayerOutPool[i], players.PlayerOutPool[i].transform.position);
+                Destroy(players.PlayerOutPool[i],2f);
+                players.PlayerOutPool.RemoveAt(i);
+                break;
+            }
+        }
+    }
+
     IEnumerator PlayerMove(int indexOfPlayerTurn)
     {
-        PlayerMovement playerIndex = players.PlayerInPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
-        int IndexPos = playerIndex.CurrentPosValue;
+        PlayerMovement playerIndex = players.PlayerOutPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
+        
+        int IndexPos = playerIndex.currentPosValue;
         int padNum = IndexPos + dice.DiceR;
-        for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count; i++)
+        if(isCanMove)
+        {
+            for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count ; i++)
         {
             yield return new WaitForSeconds(waitingTime);
             Vector3 NextPos = road.RoadLine[i].transform.position;
@@ -114,6 +150,7 @@ public class PlayerMovement : MonoBehaviour
                 playerIndex.isTurned = false;
                 manager.IsRoll = false;
                 manager.IsEndTurn = true;
+                playerIndex.bonus++;
             }
 
             if (road.RoadLine[i].isTrap && i == padNum)
@@ -124,7 +161,10 @@ public class PlayerMovement : MonoBehaviour
                 PenaltyPos.y = PenaltyPos.y + transform.localScale.y / 2 + road.RoadLine[IndexPos].transform.localScale.y;
                 playerIndex.transform.position = PenaltyPos;
                 playerIndex.currentPosValue = IndexPos;
+                playerIndex.trap++;
             }
+            playerIndex.turn++;
+        }
         }
         yield return null;
     }

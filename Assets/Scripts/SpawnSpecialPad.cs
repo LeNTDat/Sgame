@@ -5,7 +5,7 @@ using UnityEngine;
 public class SpawnSpecialPad : MonoBehaviour
 {
     [SerializeField] int minPad = 3;
-    [SerializeField] int maxPad = 26;
+    [SerializeField] int maxPad = 24;
     [SerializeField] List<Point> Points;
     GameObject road;
 
