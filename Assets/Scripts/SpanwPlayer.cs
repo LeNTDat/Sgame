@@ -52,7 +52,14 @@ public class SpanwPlayer : MonoBehaviour
         {
             if(playerName[i] == null)
             {
-                playerName[i] = inputField[i].text;
+                if(inputField[i].text == null || inputField[i].text == "")
+                {
+                    playerName[i] = "NoName_" + i;
+                }
+                else
+                {
+                    playerName[i] = inputField[i].text;
+                }
             }
         }
     }

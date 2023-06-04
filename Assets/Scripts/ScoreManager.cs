@@ -46,8 +46,6 @@ public class ScoreManager : MonoBehaviour
                     case "Trap":
                         child.GetComponent<TMP_Text>().text = listOfFinish[i].GetComponent<PlayerMovement>().NumberOfTrap.ToString();
                         break;
-
-
                 }
             }
         }
