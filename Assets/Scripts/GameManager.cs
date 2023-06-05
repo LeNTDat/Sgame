@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEditor.Progress;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +9,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] bool isEndGame = false;
     [SerializeField] bool isEndTurn = true;
     [SerializeField] bool isRolled = false;
+    [SerializeField] bool isStart = false;
     [SerializeField] int playerSize;
 
     public bool IsEndGame { get {  return isEndGame; } set { isEndGame = value; } }
@@ -18,7 +17,7 @@ public class GameManager : MonoBehaviour
     public bool IsRoll { get { return isRolled; } set { isRolled = value; } }
     public bool IsSumit { get { return isSubmitPlayerSize; }}
     public int PlayerSize { get { return playerSize; } }
-    public bool isStart = false;
+    public bool IsStart { get { return isStart; } }
 
     Dropdown m_Dropdown;
     void Start()

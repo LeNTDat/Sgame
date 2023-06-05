@@ -14,7 +14,7 @@ public class DisplayPName : MonoBehaviour
 
     void Update()
     {
-        if (!isShow && gameManager.isStart)
+        if (!isShow && gameManager.IsStart)
         {
             DisplayName();
         }

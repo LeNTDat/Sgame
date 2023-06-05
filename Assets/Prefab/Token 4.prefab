@@ -127,17 +127,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentPosValue: 0
-  rank: 0
   turn: 0
   bonus: 0
   trap: 0
   penaltyPadNum: 3
   waitingTime: 0.3
-  delayTime: 2
+  delayTime: 0.5
+  isRollDice: 0
   isTurned: 0
   isFinish: 0
-  isHavePlayer: 1
   isCanMove: 1
+  isHavePlayer: 1
 --- !u!114 &-3237539532765591440
 MonoBehaviour:
   m_ObjectHideFlags: 0

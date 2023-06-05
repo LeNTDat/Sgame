@@ -27,8 +27,9 @@ public class SpanwPlayer : MonoBehaviour
     {
         SpawnInputName();
 
-        if (gameManager.isStart && !isSpawned )
+        if (gameManager.IsStart && !isSpawned )
         {
+
             GetPlayerName();
             SpawnPlayerInPool();
         }

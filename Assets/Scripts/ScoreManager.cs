@@ -26,13 +26,16 @@ public class ScoreManager : MonoBehaviour
     }
   
     void DisplayScoreBoard () {
+        int rank = 0;
         for (int i = 0; i < listOfFinish.Count; i++)
         {
+            rank++;
             foreach (Transform child in placeFields[i].transform)
             {
                 switch (child.name)
                 {
                     case "Place":
+                        child.GetComponent<TMP_Text>().text = rank.ToString() ;
                         break;
                     case "PlayerName":
                         child.GetComponent<TMP_Text>().text = listOfFinish[i].name; 
