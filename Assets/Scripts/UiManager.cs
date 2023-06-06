@@ -40,17 +40,27 @@ public class UiManager : MonoBehaviour
     void DisplaySystemPanel()
     {
         foreach (Transform child in systemPanel.transform) { 
-            if(!gameManager.IsEndTurn) {
-                if(child.gameObject.name == "Rolled")
+            if (!gameManager.IsEndTurn) {
+                switch (child.gameObject.name)
                 {
-                    child.GetComponent<Image>().enabled = true;
+                    case "Rolled":
+                        child.GetComponent<Image>().enabled = true;
+                        break;
+                    case "Ended":
+                        child.GetComponent<Image>().enabled = false;
+                        break;
                 }
             }
             if (gameManager.IsEndTurn)
             {
-                if (child.gameObject.name == "Rolled")
+                switch (child.gameObject.name)
                 {
-                    child.GetComponent<Image>().enabled = false;
+                    case "Rolled":
+                        child.GetComponent<Image>().enabled = false;
+                        break;
+                    case "Ended":
+                        child.GetComponent<Image>().enabled = true ;
+                        break;
                 }
             }
         }

@@ -109,9 +109,6 @@ public class PlayerMovement : MonoBehaviour
                 if (!playerIndex.isTurned && !playerIndex.isFinish)
                 {
                     StartCoroutine(PlayerMove(i));
-                    playerIndex.isTurned = true;
-                    manager.IsEndTurn = false;
-                    manager.IsRoll = false;
                     break;
                 }
             }
@@ -125,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
             if (players.PlayerOutPool[i].GetComponent<PlayerMovement>().isFinish)
             {
                 scoreManager.GetFinishList(players.PlayerOutPool[i], players.PlayerOutPool[i].transform.position);
-                Destroy(players.PlayerOutPool[i],2f);
+                Destroy(players.PlayerOutPool[i],0.5f);
                 players.PlayerOutPool.RemoveAt(i);
                 break;
             }
@@ -135,10 +132,12 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator PlayerMove(int indexOfPlayerTurn)
     {
         PlayerMovement playerIndex = players.PlayerOutPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
-        
         int IndexPos = playerIndex.currentPosValue;
         int padNum = IndexPos + dice.DiceR;
-        if(isCanMove)
+        playerIndex.isTurned = true;
+        manager.IsEndTurn = false;
+        manager.IsRoll = false;
+        if (isCanMove)
         {
             for (int i = IndexPos + 1; i <= padNum && i < road.RoadLine.Count ; i++)
             {
@@ -169,6 +168,7 @@ public class PlayerMovement : MonoBehaviour
                 playerIndex.turn++;
             }
         }
+       
         yield return null;
     }
 }
