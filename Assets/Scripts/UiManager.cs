@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class UiManager : MonoBehaviour
 {
     [SerializeField] GameObject systemPanel;
+    [SerializeField] GameObject PanelmenuEndGame;
     [SerializeField] GameObject PlayerChoice;
     [SerializeField] GameObject playerNamePanel;
     [SerializeField] GameObject playerTurnNamePanel;
@@ -80,6 +81,7 @@ public class UiManager : MonoBehaviour
         }
         if (gameManager.IsEndGame)
         {
+            PanelmenuEndGame.SetActive(true);
             systemPanel.SetActive(false);
         }
     }

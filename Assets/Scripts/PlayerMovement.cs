@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static UnityEditor.Progress;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -11,9 +9,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] int bonus = 0;
     [SerializeField] int trap = 0;
     [SerializeField] int penaltyPadNum = 3;
-    [SerializeField] float waitingTime = 1f;
-    [SerializeField] float delayTime = 2f;
-    [SerializeField] bool isRollDice = false;
+    [SerializeField] float waitingTime = 0.3f;
+    [SerializeField] float delayTime = 0.5f;
     [SerializeField] bool isTurned = false;
     [SerializeField] bool isFinish = false;
     [SerializeField] bool isCanMove = true;
@@ -52,8 +49,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-   
-
     void OnCheckingPlayer()
     {
         int count = 0;
@@ -90,6 +85,7 @@ public class PlayerMovement : MonoBehaviour
         for (int i = players.PlayerOutPool.Count - 1; i >= 0; i--)
         {
             PlayerMovement playerIndex = players.PlayerOutPool[i].GetComponent<PlayerMovement>();
+            
             if (isHavePlayer)
             {
                 playerIndex.isTurned = false;
@@ -99,13 +95,17 @@ public class PlayerMovement : MonoBehaviour
  
     void RotatePlayerTurn()
     {
+        if (players.PlayerOutPool.Count == 1 || players.PlayerOutPool.Count == 0)
+        {
+            manager.IsEndTurn = true;
+        }
         if (manager.IsRoll)
         {
             for (int i = 0; i < players.PlayerOutPool.Count; i++)
             {
                 uiManager.ShowTurnName(players.PlayerOutPool[i].name);
                 PlayerMovement playerIndex = players.PlayerOutPool[i].GetComponent<PlayerMovement>();
-            
+                
                 if (!playerIndex.isTurned && !playerIndex.isFinish)
                 {
                     StartCoroutine(PlayerMove(i));
@@ -129,6 +129,23 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void GetPenaltyTrap(PlayerMovement playerIndex, int penaltyPos)
+    {
+        Vector3 PenaltyPos = road.RoadLine[penaltyPos].transform.position;
+        PenaltyPos.y = PenaltyPos.y + transform.localScale.y / 2 + road.RoadLine[penaltyPos].transform.localScale.y;
+        playerIndex.transform.position = PenaltyPos;
+        playerIndex.currentPosValue = penaltyPos;
+        playerIndex.trap++;
+    }
+
+    void GetBonusTurn(PlayerMovement playerIndex)
+    {
+        playerIndex.isTurned = false;
+        manager.IsRoll = false;
+        manager.IsEndTurn = true;
+        playerIndex.bonus++;
+    }
+
     IEnumerator PlayerMove(int indexOfPlayerTurn)
     {
         PlayerMovement playerIndex = players.PlayerOutPool[indexOfPlayerTurn].GetComponent<PlayerMovement>();
@@ -149,24 +166,34 @@ public class PlayerMovement : MonoBehaviour
 
                 if (road.RoadLine[i].isBonus && i == padNum) { 
                     yield return new WaitForSeconds(delayTime);
-                    playerIndex.isTurned = false;
-                    manager.IsRoll = false;
-                    manager.IsEndTurn = true;
-                    playerIndex.bonus++;
+                    GetBonusTurn(playerIndex);
                 }
 
                 if (road.RoadLine[i].isTrap && i == padNum)
                 {
                     IndexPos = padNum - penaltyPadNum;
                     yield return new WaitForSeconds(delayTime);
-                    Vector3 PenaltyPos = road.RoadLine[IndexPos].transform.position;
-                    PenaltyPos.y = PenaltyPos.y + transform.localScale.y / 2 + road.RoadLine[IndexPos].transform.localScale.y;
-                    playerIndex.transform.position = PenaltyPos;
-                    playerIndex.currentPosValue = IndexPos;
-                    playerIndex.trap++;
+                    GetPenaltyTrap(playerIndex, IndexPos);
+                    if (road.RoadLine[IndexPos].isBonus)
+                    {
+                        yield return new WaitForSeconds(delayTime);
+                        GetBonusTurn(playerIndex);
+                    }
+                    if (road.RoadLine[IndexPos].isTrap)
+                    {
+                        IndexPos -= penaltyPadNum;
+                        yield return new WaitForSeconds(delayTime);
+                        GetPenaltyTrap(playerIndex, IndexPos);
+                        if (road.RoadLine[IndexPos].isBonus)
+                        {
+                            yield return new WaitForSeconds(delayTime);
+                            GetBonusTurn(playerIndex);
+                        }
+                    }
+
                 }
-                playerIndex.turn++;
             }
+                playerIndex.turn++;
         }
        
         yield return null;
